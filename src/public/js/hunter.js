@@ -1,65 +1,85 @@
-const questionContainer = document.getElementById('question-container');
+const socket = io();
+
+const questionText = document.getElementById('question-text');
+const answerButtons = document.querySelectorAll('.answer-button');
 const timerDisplay = document.getElementById('timer');
-const answerButtons = document.getElementById('answer-buttons');
-let currentQuestionIndex = 0;
-let timer;
-let timeLeft = 10;
+const scoreValue = document.getElementById('score-value');
+const feedback = document.getElementById('feedback');
 
-fetch('/path/to/questions.json')
-    .then(response => response.json())
-    .then(questions => {
-        startGame(questions);
+let score = 0;
+let answered = false;
+
+socket.emit('join-as', 'hunter');
+
+socket.on('game-state', (state) => {
+    score = state.hunterScore;
+    scoreValue.textContent = score;
+});
+
+socket.on('new-question', (data) => {
+    answered = false;
+    questionText.textContent = data.question;
+    feedback.textContent = '';
+    feedback.className = '';
+    
+    answerButtons.forEach((button, index) => {
+        button.textContent = data.options[index];
+        button.disabled = false;
+        button.className = 'answer-button';
     });
+});
 
-function startGame(questions) {
-    currentQuestionIndex = 0;
-    timeLeft = 10;
-    showQuestion(questions[currentQuestionIndex]);
-}
+socket.on('timer-update', (data) => {
+    timerDisplay.textContent = data.timeLeft;
+});
 
-function showQuestion(question) {
-    questionContainer.innerText = question.question;
-    answerButtons.innerHTML = '';
-    question.answers.forEach(answer => {
-        const button = document.createElement('button');
-        button.innerText = answer.text;
-        button.classList.add('btn');
-        button.addEventListener('click', () => selectAnswer(answer));
-        answerButtons.appendChild(button);
-    });
-    startTimer();
-}
-
-function startTimer() {
-    timerDisplay.innerText = timeLeft;
-    timer = setInterval(() => {
-        timeLeft--;
-        timerDisplay.innerText = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            alert('Time is up!');
-            nextQuestion();
+socket.on('time-up', (data) => {
+    answerButtons.forEach((button, index) => {
+        button.disabled = true;
+        if (index === data.correctAnswer) {
+            button.classList.add('correct');
         }
-    }, 1000);
-}
+    });
+    feedback.textContent = 'Čas vypršel!';
+    feedback.className = 'time-up';
+});
 
-function selectAnswer(answer) {
-    clearInterval(timer);
-    const correct = answer.correct;
-    if (correct) {
-        alert('Correct answer!');
+socket.on('answer-result', (data) => {
+    if (data.correct) {
+        score++;
+        scoreValue.textContent = score;
+        feedback.textContent = 'Správně!';
+        feedback.className = 'correct';
     } else {
-        alert('Wrong answer!');
+        feedback.textContent = 'Špatně!';
+        feedback.className = 'incorrect';
     }
-    nextQuestion();
-}
+    
+    answerButtons.forEach((button, index) => {
+        button.disabled = true;
+        if (index === data.correctAnswer) {
+            button.classList.add('correct');
+        }
+    });
+});
 
-function nextQuestion() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        timeLeft = 10;
-        showQuestion(questions[currentQuestionIndex]);
-    } else {
-        alert('Game over!');
-    }
-}
+socket.on('game-over', (data) => {
+    questionText.textContent = 'Hra skončila!';
+    answerButtons.forEach(button => {
+        button.style.display = 'none';
+    });
+    
+    const winner = data.winner === 'hunter' ? 'Lovec vyhrál!' : 'Soutěžící vyhrál!';
+    feedback.textContent = `${winner} Skóre: Lovec ${data.hunterScore} - ${data.contestantScore} Soutěžící`;
+    feedback.className = 'game-over';
+});
+
+answerButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        if (!answered) {
+            answered = true;
+            const answerIndex = parseInt(button.dataset.index);
+            socket.emit('submit-answer', { role: 'hunter', answerIndex });
+        }
+    });
+});

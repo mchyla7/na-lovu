@@ -1,51 +1,79 @@
-const moderatorForm = document.getElementById('moderator-form');
-const uploadButton = document.getElementById('upload-button');
-const messageBox = document.getElementById('message-box');
+const socket = io();
 
-uploadButton.addEventListener('click', () => {
-    const fileInput = document.getElementById('file-input');
+const uploadForm = document.getElementById('upload-form');
+const fileInput = document.getElementById('file-input');
+const statusMessage = document.getElementById('status-message');
+const startGameBtn = document.getElementById('start-game');
+const nextQuestionBtn = document.getElementById('next-question');
+
+socket.emit('join-as', 'moderator');
+
+uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
     const file = fileInput.files[0];
-
     if (!file) {
-        messageBox.textContent = 'Please select a JSON file to upload.';
+        statusMessage.textContent = 'Prosím vyberte JSON soubor';
+        statusMessage.style.color = 'red';
         return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        try {
-            const questions = JSON.parse(event.target.result);
-            // Validate the structure of the questions
-            if (Array.isArray(questions) && questions.every(q => 
-                q.question && 
-                Array.isArray(q.options) && 
-                q.options.length === 3 && 
-                q.correctAnswer)) {
-                // Send the questions to the server
-                fetch('/api/admin/upload-questions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(questions)
-                })
-                .then(response => {
-                    if (response.ok) {
-                        messageBox.textContent = 'Questions uploaded successfully!';
-                    } else {
-                        messageBox.textContent = 'Failed to upload questions. Please try again.';
-                    }
-                })
-                .catch(error => {
-                    messageBox.textContent = 'Error uploading questions: ' + error.message;
-                });
-            } else {
-                messageBox.textContent = 'Invalid question format. Please check your JSON file.';
-            }
-        } catch (error) {
-            messageBox.textContent = 'Error reading file: ' + error.message;
-        }
-    };
+    const formData = new FormData();
+    formData.append('questions', file);
 
-    reader.readAsText(file);
+    try {
+        const response = await fetch('/api/upload-questions', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            statusMessage.textContent = result.message;
+            statusMessage.style.color = 'green';
+            startGameBtn.disabled = false;
+        } else {
+            statusMessage.textContent = 'Chyba: ' + result.error;
+            statusMessage.style.color = 'red';
+        }
+    } catch (error) {
+        statusMessage.textContent = 'Chyba při nahrávání: ' + error.message;
+        statusMessage.style.color = 'red';
+    }
+});
+
+startGameBtn.addEventListener('click', () => {
+    socket.emit('start-game');
+    statusMessage.textContent = 'Hra byla spuštěna!';
+    statusMessage.style.color = 'blue';
+    startGameBtn.disabled = true;
+    nextQuestionBtn.disabled = false;
+});
+
+nextQuestionBtn.addEventListener('click', () => {
+    socket.emit('next-question');
+    statusMessage.textContent = 'Další otázka...';
+    statusMessage.style.color = 'blue';
+});
+
+socket.on('questions-loaded', (data) => {
+    statusMessage.textContent = `Nahráno ${data.count} otázek`;
+    statusMessage.style.color = 'green';
+    startGameBtn.disabled = false;
+});
+
+socket.on('new-question', (data) => {
+    statusMessage.textContent = `Otázka ${data.questionIndex + 1}/${data.totalQuestions}: ${data.question}`;
+    nextQuestionBtn.disabled = false;
+});
+
+socket.on('time-up', () => {
+    statusMessage.textContent = 'Čas vypršel! Klikněte "Další otázka".';
+});
+
+socket.on('game-over', (data) => {
+    statusMessage.textContent = `Hra skončila! Lovec: ${data.hunterScore}, Soutěžící: ${data.contestantScore}. Vyhrál: ${data.winner === 'hunter' ? 'Lovec' : 'Soutěžící'}`;
+    nextQuestionBtn.disabled = true;
+    startGameBtn.disabled = false;
 });

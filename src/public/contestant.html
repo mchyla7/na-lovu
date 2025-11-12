@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contestant Interface</title>
+    <title>Soutěžící - Na lovu</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="quiz-container">
-        <h1>Quiz Game</h1>
-        <div id="question"></div>
-        <div id="options">
-            <button class="option" onclick="submitAnswer(0)"></button>
-            <button class="option" onclick="submitAnswer(1)"></button>
-            <button class="option" onclick="submitAnswer(2)"></button>
+        <h1>Soutěžící</h1>
+        <div id="score">Skóre: <span id="score-value">0</span></div>
+        <div id="question-container">
+            <p id="question">Čekám na otázku...</p>
+            <div id="options">
+                <button class="option" data-index="0"></button>
+                <button class="option" data-index="1"></button>
+                <button class="option" data-index="2"></button>
+            </div>
         </div>
         <div id="timer">10</div>
+        <div id="feedback"></div>
     </div>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/contestant.js"></script>
 </body>
 </html>

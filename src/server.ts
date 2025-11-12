@@ -25,7 +25,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 const upload = multer({
   dest: 'uploads/',
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/json') {
+    const isJson = file.mimetype === 'application/json' || 
+                   file.mimetype === 'text/json' ||
+                   file.originalname.endsWith('.json');
+    if (isJson) {
       cb(null, true);
     } else {
       cb(new Error('Pouze JSON soubory jsou povoleny'));

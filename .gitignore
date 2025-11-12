@@ -1,0 +1,7 @@
+node_modules
+dist
+public
+uploads/*
+!uploads/.gitkeep
+*.log
+.env
