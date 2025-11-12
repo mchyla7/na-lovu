@@ -1,30 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Game</title>
+    <title>Na lovu - Kvízová hra</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .main-container {
+            max-width: 900px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        .instructions h2 {
+            color: #35424a;
+            margin-top: 0;
+        }
+        .instructions ul {
+            line-height: 1.8;
+        }
+        .role-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .role-button {
+            padding: 30px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        .role-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .moderator-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .hunter-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .contestant-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .example-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+        .example-section h3 {
+            margin-top: 0;
+        }
+        .example-section pre {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to the Quiz Game</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Instructions</h2>
-            <p>Join as a contestant or a hunter and test your knowledge!</p>
-            <p>Each question will have 10 seconds for answering.</p>
-        </section>
-        <section>
-            <h2>Join the Game</h2>
-            <button onclick="window.location.href='contestant.html'">Join as Contestant</button>
-            <button onclick="window.location.href='hunter.html'">Join as Hunter</button>
-            <button onclick="window.location.href='moderator.html'">Join as Moderator</button>
-        </section>
-    </main>
-    <script src="js/moderator.js"></script>
-    <script src="js/hunter.js"></script>
-    <script src="js/contestant.js"></script>
+    <div class="main-container">
+        <h1>🎮 Na lovu</h1>
+        <p class="subtitle">Kvízová hra inspirovaná televizním pořadem</p>
+
+        <div class="instructions">
+            <h2>📋 Jak to funguje</h2>
+            <ul>
+                <li>🎯 <strong>Moderátor</strong> nahraje JSON soubor s otázkami a řídí průběh hry</li>
+                <li>🦁 <strong>Lovec</strong> odpovídá na otázky a snaží se porazit soutěžícího</li>
+                <li>🎯 <strong>Soutěžící</strong> odpovídá na stejné otázky a soutěží s lovcem</li>
+                <li>⏱️ Na každou otázku je přesně <strong>10 sekund</strong></li>
+                <li>🎲 Každá otázka má <strong>3 možnosti odpovědí</strong></li>
+                <li>🔄 Všechny displaye jsou <strong>synchronizované v reálném čase</strong></li>
+            </ul>
+        </div>
+
+        <h2 style="text-align: center; margin: 30px 0;">Vyberte svou roli</h2>
+        
+        <div class="role-buttons">
+            <a href="moderator.html" class="role-button moderator-btn">
+                🎬 Moderátor
+            </a>
+            <a href="hunter.html" class="role-button hunter-btn">
+                🦁 Lovec
+            </a>
+            <a href="contestant.html" class="role-button contestant-btn">
+                🎯 Soutěžící
+            </a>
+        </div>
+
+        <div class="example-section">
+            <h3>📄 Formát JSON souboru s otázkami</h3>
+            <pre>{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Jaké je hlavní město České republiky?",
+      "options": ["Brno", "Praha", "Ostrava"],
+      "correctAnswer": 1
+    }
+  ]
+}</pre>
+            <p><strong>Poznámka:</strong> <code>correctAnswer</code> je index správné odpovědi (0, 1, nebo 2)</p>
+        </div>
+    </div>
 </body>
 </html>

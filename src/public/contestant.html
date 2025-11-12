@@ -1,22 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contestant Interface</title>
+    <title>Soutěžící - Na lovu</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #f5576c;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .waiting {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        .question-container {
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+        }
+        .question-text {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 80px;
+        }
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #e8491d;
+        }
+        .answer-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .answer-button {
+            padding: 20px;
+            font-size: 18px;
+            border: 2px solid #f5576c;
+            background: white;
+            color: #f5576c;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .answer-button:hover:not(:disabled) {
+            background: #f5576c;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.3);
+        }
+        .answer-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .answer-button.selected {
+            background: #f5576c;
+            color: white;
+        }
+        .answer-button.correct {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        .answer-button.incorrect {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        .score {
+            text-align: center;
+            font-size: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+        .score-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #f5576c;
+        }
+        .game-over {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        .game-over.active {
+            display: block;
+        }
+        .result-message {
+            font-size: 28px;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div id="quiz-container">
-        <h1>Quiz Game</h1>
-        <div id="question"></div>
-        <div id="options">
-            <button class="option" onclick="submitAnswer(0)"></button>
-            <button class="option" onclick="submitAnswer(1)"></button>
-            <button class="option" onclick="submitAnswer(2)"></button>
+    <div class="game-container">
+        <h1>🎯 Soutěžící</h1>
+        
+        <div class="score">
+            <div>Vaše skóre</div>
+            <div class="score-value" id="score">0</div>
         </div>
-        <div id="timer">10</div>
+
+        <div class="waiting" id="waiting">
+            <h2>⏳ Čekání na začátek hry...</h2>
+            <p>Moderátor spustí hru</p>
+        </div>
+
+        <div class="question-container" id="question-container">
+            <div class="timer" id="timer">10</div>
+            <div class="question-text" id="question-text"></div>
+            <div class="answer-options" id="answer-options">
+                <button class="answer-button" data-index="0"></button>
+                <button class="answer-button" data-index="1"></button>
+                <button class="answer-button" data-index="2"></button>
+            </div>
+        </div>
+
+        <div class="game-over" id="game-over">
+            <h2>🎉 Konec hry!</h2>
+            <div class="result-message" id="result-message"></div>
+        </div>
     </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/contestant.js"></script>
 </body>
 </html>

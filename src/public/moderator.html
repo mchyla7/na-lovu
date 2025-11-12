@@ -1,22 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderator Interface</title>
+    <title>Moderátor - Na lovu</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .upload-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+        }
+        .status-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .game-controls {
+            margin: 20px 0;
+        }
+        .game-controls button {
+            margin: 5px;
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        .game-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .score-item {
+            text-align: center;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 5px;
+            flex: 1;
+            margin: 0 10px;
+        }
+        .score-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #35424a;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Moderator Interface</h1>
-        <form id="upload-form">
-            <label for="file-input">Upload Questions (JSON):</label>
-            <input type="file" id="file-input" accept=".json" required>
-            <button type="submit">Upload</button>
-        </form>
-        <div id="status-message"></div>
-        <button id="start-game">Start Game</button>
+        <h1>🎮 Moderátor - Na lovu</h1>
+        
+        <div class="upload-section">
+            <h2>Nahrát otázky</h2>
+            <form id="upload-form">
+                <label for="file-input">Vyberte JSON soubor s otázkami:</label>
+                <input type="file" id="file-input" accept=".json" required>
+                <button type="submit">Nahrát</button>
+            </form>
+            <div id="status-message"></div>
+        </div>
+
+        <div class="game-info" id="game-info" style="display: none;">
+            <h3>Informace o hře</h3>
+            <p><strong>Počet otázek:</strong> <span id="question-count">0</span></p>
+            <p><strong>Aktuální otázka:</strong> <span id="current-question">-</span></p>
+            <p><strong>Zbývající čas:</strong> <span id="timer-display">10</span>s</p>
+        </div>
+
+        <div class="score-display">
+            <div class="score-item">
+                <div>Lovec</div>
+                <div class="score-value" id="hunter-score">0</div>
+            </div>
+            <div class="score-item">
+                <div>Soutěžící</div>
+                <div class="score-value" id="contestant-score">0</div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button id="start-game" disabled>Spustit hru</button>
+            <button id="next-question" disabled>Další otázka</button>
+            <button id="reset-game" disabled>Reset</button>
+        </div>
     </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/moderator.js"></script>
 </body>
 </html>
