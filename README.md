@@ -108,6 +108,25 @@ na-lovu
    docker compose down
    ```
 
+## Testování Docker instalace
+
+Pro ověření, že Docker instalace funguje správně:
+
+1. Sestavte a spusťte kontejner:
+   ```bash
+   npm install
+   npm run build
+   docker compose up
+   ```
+
+2. V prohlížeči otevřete `http://localhost:3000/moderator.html`
+
+3. Nahrajte ukázkové otázky z `questions/example-questions.json`
+
+4. Otevřete další záložky pro lovce a soutěžícího
+
+5. Spusťte hru z rozhraní moderátora
+
 ## Použití
 
 1. **Moderátor**: 
