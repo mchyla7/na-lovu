@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hunter Interface</title>
+    <title>Lovec - Na lovu</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="game-container">
-        <h1>Hunter Game</h1>
+        <h1>Lovec</h1>
+        <div id="score">Skóre: <span id="score-value">0</span></div>
         <div id="question-container">
-            <p id="question-text"></p>
+            <p id="question-text">Čekám na otázku...</p>
             <div id="answer-options">
-                <button class="answer-button" id="option1"></button>
-                <button class="answer-button" id="option2"></button>
-                <button class="answer-button" id="option3"></button>
+                <button class="answer-button" data-index="0"></button>
+                <button class="answer-button" data-index="1"></button>
+                <button class="answer-button" data-index="2"></button>
             </div>
         </div>
         <div id="timer">10</div>
+        <div id="feedback"></div>
     </div>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/hunter.js"></script>
 </body>
 </html>
