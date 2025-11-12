@@ -1,0 +1,17 @@
+{
+  "name": "na-lovu",
+  "version": "1.0.0",
+  "description": "The Chase (Na lovu) competition system - web-based trivia game with moderator, contestant, and chaser interfaces",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderátor - Na lovu</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f5576c;
+            padding-bottom: 10px;
+        }
+
+        .round-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-start {
+            background: #4CAF50;
+        }
+
+        .btn-cashbuilder {
+            background: #2196F3;
+        }
+
+        .btn-headtohead {
+            background: #FF9800;
+        }
+
+        .btn-finalchase {
+            background: #9C27B0;
+        }
+
+        .btn-reset {
+            background: #f44336;
+        }
+
+        .btn-reveal {
+            background: #00BCD4;
+        }
+
+        .btn-send {
+            background: #4CAF50;
+        }
+
+        .question-form {
+            margin-top: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .answer-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .game-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .status-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #f5576c;
+        }
+
+        .status-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .status-card p {
+            color: #333;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .answer-status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .answer-box {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .answer-box.received {
+            background: #e8f5e9;
+            border: 2px solid #4CAF50;
+        }
+
+        .answer-box.waiting {
+            background: #fff3e0;
+            border: 2px solid #FF9800;
+        }
+
+        .history-item {
+            background: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .correct {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .incorrect {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .position-setter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .position-setter input {
+            width: 100px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📺 Moderátor - Na lovu</h1>
+
+        <div class="panel">
+            <h2>Ovládání hry</h2>
+            <div class="round-buttons">
+                <button class="btn-cashbuilder" onclick="startRound('cashbuilder')">Peněžní honba</button>
+                <button class="btn-headtohead" onclick="startRound('headtohead')">Souboj tváří v tvář</button>
+                <button class="btn-finalchase" onclick="startRound('finalchase')">Finální honba</button>
+                <button class="btn-reset" onclick="resetGame()">Reset hry</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Stav hry</h2>
+            <div class="game-status">
+                <div class="status-card">
+                    <h3>Kolo</h3>
+                    <p id="currentRound">Čekání</p>
+                </div>
+                <div class="status-card">
+                    <h3>Skóre soutěžícího</h3>
+                    <p id="contestantScore">0 Kč</p>
+                </div>
+                <div class="status-card">
+                    <h3>Pozice soutěžícího</h3>
+                    <p id="contestantPosition">0</p>
+                </div>
+                <div class="status-card">
+                    <h3>Pozice lovce</h3>
+                    <p id="chaserPosition">-3</p>
+                </div>
+            </div>
+
+            <div class="answer-status">
+                <div class="answer-box waiting" id="contestantAnswerBox">
+                    <strong>Soutěžící</strong>
+                    <p id="contestantAnswer">Čeká na odpověď...</p>
+                </div>
+                <div class="answer-box waiting" id="chaserAnswerBox">
+                    <strong>Lovec</strong>
+                    <p id="chaserAnswer">Čeká na odpověď...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Odeslat otázku</h2>
+            <div class="question-form">
+                <textarea id="questionText" placeholder="Zadejte text otázky..."></textarea>
+                
+                <div class="answer-options">
+                    <input type="text" id="answerA" placeholder="Odpověď A">
+                    <input type="text" id="answerB" placeholder="Odpověď B">
+                    <input type="text" id="answerC" placeholder="Odpověď C">
+                </div>
+                
+                <button class="btn-send" onclick="sendQuestion()">Odeslat otázku</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Odhalit správnou odpověď</h2>
+            <div class="round-buttons">
+                <button class="btn-reveal" onclick="revealAnswer('A')">Správná: A</button>
+                <button class="btn-reveal" onclick="revealAnswer('B')">Správná: B</button>
+                <button class="btn-reveal" onclick="revealAnswer('C')">Správná: C</button>
+            </div>
+            
+            <div class="position-setter" id="headToHeadSettings" style="display: none;">
+                <label>Nastavit startovní pozici (kroky před lovcem):</label>
+                <input type="number" id="startPosition" value="3" min="1" max="7">
+                <button class="btn-send" onclick="setHeadToHeadStart()">Nastavit</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Historie otázek</h2>
+            <div id="questionHistory"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let gameState = {};
+
+        socket.on('gameState', (state) => {
+            gameState = state;
+            updateDisplay();
+        });
+
+        socket.on('newQuestion', (question) => {
+            document.getElementById('contestantAnswerBox').className = 'answer-box waiting';
+            document.getElementById('chaserAnswerBox').className = 'answer-box waiting';
+            document.getElementById('contestantAnswer').textContent = 'Čeká na odpověď...';
+            document.getElementById('chaserAnswer').textContent = 'Čeká na odpověď...';
+        });
+
+        socket.on('answerSubmitted', (data) => {
+            if (data.role === 'contestant') {
+                document.getElementById('contestantAnswerBox').className = 'answer-box received';
+                document.getElementById('contestantAnswer').textContent = `Odpověď: ${data.answer}`;
+            } else if (data.role === 'chaser') {
+                document.getElementById('chaserAnswerBox').className = 'answer-box received';
+                document.getElementById('chaserAnswer').textContent = `Odpověď: ${data.answer}`;
+            }
+        });
+
+        socket.on('answerRevealed', (result) => {
+            updateHistory();
+        });
+
+        function updateDisplay() {
+            const roundNames = {
+                'waiting': 'Čekání',
+                'cashbuilder': 'Peněžní honba',
+                'headtohead': 'Souboj tváří v tvář',
+                'finalchase': 'Finální honba'
+            };
+
+            document.getElementById('currentRound').textContent = roundNames[gameState.round] || 'Neznámé';
+            document.getElementById('contestantScore').textContent = gameState.contestantScore + ' Kč';
+            document.getElementById('contestantPosition').textContent = gameState.contestantPosition;
+            document.getElementById('chaserPosition').textContent = gameState.chaserPosition;
+
+            // Show/hide head-to-head settings
+            const headToHeadSettings = document.getElementById('headToHeadSettings');
+            if (gameState.round === 'headtohead') {
+                headToHeadSettings.style.display = 'flex';
+            } else {
+                headToHeadSettings.style.display = 'none';
+            }
+
+            updateHistory();
+        }
+
+        function updateHistory() {
+            const historyDiv = document.getElementById('questionHistory');
+            historyDiv.innerHTML = '';
+
+            if (gameState.questionHistory && gameState.questionHistory.length > 0) {
+                gameState.questionHistory.slice().reverse().forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <strong>Otázka ${gameState.questionHistory.length - index}:</strong> ${item.question.text}<br>
+                        <strong>Správná odpověď:</strong> ${item.correctAnswer}<br>
+                        <strong>Soutěžící:</strong> ${item.contestantAnswer} 
+                        <span class="${item.contestantCorrect ? 'correct' : 'incorrect'}">
+                            ${item.contestantCorrect ? '✓' : '✗'}
+                        </span><br>
+                        <strong>Lovec:</strong> ${item.chaserAnswer} 
+                        <span class="${item.chaserCorrect ? 'correct' : 'incorrect'}">
+                            ${item.chaserCorrect ? '✓' : '✗'}
+                        </span>
+                    `;
+                    historyDiv.appendChild(div);
+                });
+            } else {
+                historyDiv.innerHTML = '<p style="color: #999; text-align: center;">Zatím žádné otázky</p>';
+            }
+        }
+
+        function startRound(round) {
+            socket.emit('startRound', round);
+        }
+
+        function resetGame() {
+            if (confirm('Opravdu chcete resetovat hru?')) {
+                socket.emit('resetGame');
+            }
+        }
+
+        function sendQuestion() {
+            const text = document.getElementById('questionText').value.trim();
+            const answerA = document.getElementById('answerA').value.trim();
+            const answerB = document.getElementById('answerB').value.trim();
+            const answerC = document.getElementById('answerC').value.trim();
+
+            if (!text || !answerA || !answerB || !answerC) {
+                alert('Vyplňte prosím všechna pole!');
+                return;
+            }
+
+            const question = {
+                text,
+                answers: { A: answerA, B: answerB, C: answerC }
+            };
+
+            socket.emit('sendQuestion', question);
+
+            // Clear form
+            document.getElementById('questionText').value = '';
+            document.getElementById('answerA').value = '';
+            document.getElementById('answerB').value = '';
+            document.getElementById('answerC').value = '';
+        }
+
+        function revealAnswer(answer) {
+            socket.emit('revealAnswer', answer);
+        }
+
+        function setHeadToHeadStart() {
+            const position = parseInt(document.getElementById('startPosition').value);
+            if (position >= 1 && position <= 7) {
+                socket.emit('setHeadToHeadStart', position);
+            } else {
+                alert('Pozice musí být mezi 1 a 7');
+            }
+        }
+    </script>
+</body>
+</html>
