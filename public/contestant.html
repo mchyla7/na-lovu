@@ -274,7 +274,7 @@
         function displayQuestion() {
             if (!currentQuestion) return;
 
-            document.getElementById('questionText').innerHTML = currentQuestion.text;
+            document.getElementById('questionText').textContent = currentQuestion.text;
 
             const answersSection = document.getElementById('answersSection');
             answersSection.innerHTML = '';

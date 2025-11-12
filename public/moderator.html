@@ -345,18 +345,48 @@
                 gameState.questionHistory.slice().reverse().forEach((item, index) => {
                     const div = document.createElement('div');
                     div.className = 'history-item';
-                    div.innerHTML = `
-                        <strong>Otázka ${gameState.questionHistory.length - index}:</strong> ${item.question.text}<br>
-                        <strong>Správná odpověď:</strong> ${item.correctAnswer}<br>
-                        <strong>Soutěžící:</strong> ${item.contestantAnswer} 
-                        <span class="${item.contestantCorrect ? 'correct' : 'incorrect'}">
-                            ${item.contestantCorrect ? '✓' : '✗'}
-                        </span><br>
-                        <strong>Lovec:</strong> ${item.chaserAnswer} 
-                        <span class="${item.chaserCorrect ? 'correct' : 'incorrect'}">
-                            ${item.chaserCorrect ? '✓' : '✗'}
-                        </span>
-                    `;
+                    
+                    const questionLabel = document.createElement('strong');
+                    questionLabel.textContent = `Otázka ${gameState.questionHistory.length - index}: `;
+                    div.appendChild(questionLabel);
+                    
+                    const questionText = document.createTextNode(item.question.text);
+                    div.appendChild(questionText);
+                    div.appendChild(document.createElement('br'));
+                    
+                    const answerLabel = document.createElement('strong');
+                    answerLabel.textContent = 'Správná odpověď: ';
+                    div.appendChild(answerLabel);
+                    
+                    const answerText = document.createTextNode(item.correctAnswer);
+                    div.appendChild(answerText);
+                    div.appendChild(document.createElement('br'));
+                    
+                    const contestantLabel = document.createElement('strong');
+                    contestantLabel.textContent = 'Soutěžící: ';
+                    div.appendChild(contestantLabel);
+                    
+                    const contestantAnswer = document.createTextNode(item.contestantAnswer + ' ');
+                    div.appendChild(contestantAnswer);
+                    
+                    const contestantSpan = document.createElement('span');
+                    contestantSpan.className = item.contestantCorrect ? 'correct' : 'incorrect';
+                    contestantSpan.textContent = item.contestantCorrect ? '✓' : '✗';
+                    div.appendChild(contestantSpan);
+                    div.appendChild(document.createElement('br'));
+                    
+                    const chaserLabel = document.createElement('strong');
+                    chaserLabel.textContent = 'Lovec: ';
+                    div.appendChild(chaserLabel);
+                    
+                    const chaserAnswer = document.createTextNode(item.chaserAnswer + ' ');
+                    div.appendChild(chaserAnswer);
+                    
+                    const chaserSpan = document.createElement('span');
+                    chaserSpan.className = item.chaserCorrect ? 'correct' : 'incorrect';
+                    chaserSpan.textContent = item.chaserCorrect ? '✓' : '✗';
+                    div.appendChild(chaserSpan);
+                    
                     historyDiv.appendChild(div);
                 });
             } else {
