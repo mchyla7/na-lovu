@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon --watch src --exec ts-node src/server.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/public public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

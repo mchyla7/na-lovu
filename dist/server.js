@@ -25,7 +25,10 @@ app.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
 const upload = (0, multer_1.default)({
     dest: 'uploads/',
     fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/json') {
+        const isJson = file.mimetype === 'application/json' ||
+            file.mimetype === 'text/json' ||
+            file.originalname.endsWith('.json');
+        if (isJson) {
             cb(null, true);
         }
         else {
