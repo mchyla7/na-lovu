@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Quiz Game</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Instructions</h2>
+            <p>Join as a contestant or a hunter and test your knowledge!</p>
+            <p>Each question will have 10 seconds for answering.</p>
+        </section>
+        <section>
+            <h2>Join the Game</h2>
+            <button onclick="window.location.href='contestant.html'">Join as Contestant</button>
+            <button onclick="window.location.href='hunter.html'">Join as Hunter</button>
+            <button onclick="window.location.href='moderator.html'">Join as Moderator</button>
+        </section>
+    </main>
+    <script src="js/moderator.js"></script>
+    <script src="js/hunter.js"></script>
+    <script src="js/contestant.js"></script>
+</body>
+</html>

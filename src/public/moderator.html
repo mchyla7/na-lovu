@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderator Interface</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Moderator Interface</h1>
+        <form id="upload-form">
+            <label for="file-input">Upload Questions (JSON):</label>
+            <input type="file" id="file-input" accept=".json" required>
+            <button type="submit">Upload</button>
+        </form>
+        <div id="status-message"></div>
+        <button id="start-game">Start Game</button>
+    </div>
+    <script src="js/moderator.js"></script>
+</body>
+</html>

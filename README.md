@@ -1,89 +1,110 @@
-# Na lovu (The Chase) – školní realtime hra
+# Na lovu - Kvízová hra
 
-Tento projekt poskytuje jednoduchou webovou aplikaci pro soutěž ve stylu TV hry **"Na lovu" (The Chase)**. Běží na Node.js + Socket.IO a umožňuje tři oddělené role na třech počítačích:
+## Přehled
+Tento projekt je kvízová hra inspirovaná pořadem "Na lovu", která umožňuje moderátorovi nahrát otázky ve formátu JSON. Hra zahrnuje lovce a soutěžícího, kteří odpovídají na otázky s výběrem ze tří možností v časovém limitu 10 sekund.
 
-1. Moderátor – zakládá/připojuje místnost, zadává otázky, vyhodnocuje odpovědi.
-2. Soutěžící – vidí otázky a odesílá vlastní odpověď.
-3. Lovec – vidí otázky a snaží se porazit soutěžícího.
+## Struktura projektu
+```
+na-lovu
+├── src
+│   ├── server.ts               # Hlavní soubor aplikace
+│   ├── types
+│   │   └── index.ts            # Definice typů pro otázky a odpovědi
+│   ├── routes
+│   │   ├── admin.ts            # Admin rozhraní pro správu otázek
+│   │   └── game.ts             # Herní rozhraní pro průběh hry
+│   └── public
+│       ├── index.html          # Hlavní vstupní stránka
+│       ├── moderator.html      # Rozhraní moderátora pro nahrání otázek
+│       ├── hunter.html         # Rozhraní lovce
+│       ├── contestant.html     # Rozhraní soutěžícího
+│       ├── css
+│       │   └── style.css       # Styly aplikace
+│       └── js
+│           ├── moderator.js    # Logika pro rozhraní moderátora
+│           ├── hunter.js       # Logika pro rozhraní lovce
+│           └── contestant.js   # Logika pro rozhraní soutěžícího
+├── uploads
+│   └── .gitkeep                # Udržuje adresář uploads ve verzovacím systému
+├── questions
+│   └── example-questions.json  # Ukázkové otázky ve formátu JSON
+├── package.json                # Konfigurace npm
+├── tsconfig.json               # Konfigurace TypeScript
+└── README.md                   # Dokumentace projektu
+```
 
 ## Funkce
 
-- Vytvoření místnosti s kódem (např. **ABCD1**)
-- Připojení soutěžícího a lovce podle kódu
-- Otázky typu otevřená odpověď nebo výběr z možností (multi-choice)
-- Zamknutí odpovědi (po jednom pokusu)
-- Ruční nebo automatické vyhodnocení (u výběru z možností se hodnotí automaticky)
-- Přičítání bodů za správné odpovědi
-- Realtime synchronizace stavů přes WebSocket (Socket.IO)
+- **Nahrávání otázek**: Moderátoři mohou nahrát JSON soubor s otázkami, kde každá má tři možnosti odpovědí a určenou správnou odpověď.
+- **Časovaná hra**: Soutěžící i lovec mají přesně 10 sekund na každou otázku, se synchronizovaným časem.
+- **Více rozhraní**: Oddělené HTML stránky pro moderátory, lovce a soutěžící pro různé role ve hře.
+- **Real-time synchronizace**: Všichni účastníci vidí stejnou otázku a časovač běží synchronně pomocí WebSocket.
 
-## Struktura
+## Formát JSON otázek
 
-```text
-src/
-	server.js        # Express + Socket.IO server
-	gameState.js     # Správa stavů místností a otázek
-public/
-	index.html       # Připojení do role soutěžící/lovec, odkaz na moderátora
-	moderator.html   # Panel moderátora
-	contestant.html  # Klient soutěžícího
-	chaser.html      # Klient lovce
-	styles.css       # Jednoduché UI
-Dockerfile
-docker-compose.yml
+```json
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Jaké je hlavní město České republiky?",
+      "options": ["Brno", "Praha", "Ostrava"],
+      "correctAnswer": 1
+    }
+  ]
+}
 ```
 
-## Rychlé spuštění (lokálně)
+## Instalace
 
-Potřebujete Node.js (doporučeno 18+).
+1. Naklonujte repozitář:
+   ```bash
+   git clone <url-repozitare>
+   cd na-lovu
+   ```
 
-```bash
-npm install
-npm start
-```
+2. Nainstalujte závislosti:
+   ```bash
+   npm install
+   ```
 
-Otevřete prohlížeč na `http://localhost:3000`.
+3. Spusťte server:
+   ```bash
+   npm start
+   ```
 
-## Docker
+4. Otevřete prohlížeč a přejděte na `http://localhost:3000`
 
-Build + run:
+## Použití
 
-```bash
-docker build -t na-lovu .
-docker run -p 3000:3000 na-lovu
-```
+1. **Moderátor**: 
+   - Otevře `/moderator.html`
+   - Nahraje JSON soubor s otázkami
+   - Spustí hru a řídí průběh
 
-Nebo pomocí `docker-compose`:
+2. **Lovec**: 
+   - Otevře `/hunter.html`
+   - Vidí otázky a odpovídá současně se soutěžícím
+   
+3. **Soutěžící**: 
+   - Otevře `/contestant.html`
+   - Odpovídá na otázky v časovém limitu 10 sekund
 
-```bash
-docker compose up --build
-```
+## Pravidla
 
-## Použití ve hře
+- Každá otázka má časový limit 10 sekund
+- Soutěžící i lovec odpovídají současně
+- Skóre se počítá automaticky
+- Všechny displeje jsou synchronizované v reálném čase
 
-1. Moderátor otevře `http://SERVER:3000/moderator.html` a vytvoří místnost (nebo se připojí k již existující). Zobrazí se kód místnosti.
-2. Soutěžící a Lovec na svých počítačích otevřou `http://SERVER:3000/`, zadají kód a svoje jméno a připojí se jako **Soutěžící** resp. **Lovec**.
-3. Moderátor zadá otázku: otevřenou (libovolný text) nebo výběr z možností (zaškrtne „Výběr z možností“ a doplní varianty + index správné odpovědi).
-4. Soutěžící a Lovec odešlou odpovědi (u výběru z možností kliknou na tlačítko; u otevřené vyplní text). Odpověď se po odeslání zamkne.
-5. Moderátor buď ručně označí správnost (u otevřené otázky) a stiskne „Potvrdit skóre“, nebo u výběru z možností prostě dá „Vyhodnotit / ukončit“ – skóre se přidá automaticky.
-6. Skóre se průběžně aktualizuje. Postupně můžete pokládat další otázky.
+## Příspěvky
 
-## Bezpečnost a omezení
+Pokud chcete přispět k vylepšení hry, neváhejte vytvořit issue nebo pull request.
 
-- Stav je v paměti – po restartu serveru se vše smaže.
-- Není implementováno ověření identity ani trvalé logování.
-- Wi-Fi/lan latence může ovlivnit „rychlost“ závodu – pro školní účely zpravidla stačí.
+## Demo
 
-## Možné rozšíření
-
-- Více místností najednou (aktuálně podporováno, ale UI neumožňuje listování)
-- Statistiky po skončení hry
-- Časovač a automatické uzavření odpovědí
-- Role publika (jen sledování)
-- Persistované výsledky (databáze)
+Pro rychlou ukázku funkčnosti si můžete prohlédnout [toto video](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
 ## Licence
 
-Projekt určen pro školní nekomerční použití. Můžete upravit dle potřeb.
-
----
-Pokud chcete další funkce (např. automatický časovač s odpočtem na frontend, více kol, různou bodovou hodnotu otázek), napište a můžeme doplnit.
+Tento projekt je licencován pod licencí MIT - podrobnosti naleznete v souboru [LICENSE](LICENSE).
