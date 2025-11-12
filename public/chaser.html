@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Na lovu – Lovec</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Lovec</h1>
+    <div id="info"></div>
+    <section class="card" id="question" style="display:none"></section>
+    <section class="card" id="answer" style="display:none">
+      <h3>Vaše odpověď</h3>
+      <form id="answerForm">
+        <div id="answerInputs"></div>
+        <button type="submit" id="btnSend">Odeslat</button>
+      </form>
+    </section>
+    <p><a href="/">← Zpět</a></p>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const ioClient = io();
+    const params = new URLSearchParams(location.search);
+    const roomCode = params.get('room');
+    const myName = params.get('name') || 'Lovec';
+
+    let locked = false;
+
+    ioClient.emit('joinRoom', { roomCode, role: 'chaser', name: myName });
+
+    ioClient.on('errorMessage', m => alert(m));
+
+    ioClient.on('roomUpdate', (room) => {
+      if (!room) return;
+      document.getElementById('info').innerHTML = `<div>Místnost: <code>${room.code}</code></div><div>Soutěžící: <strong>${room.contestant || '—'}</strong></div><div>Skóre: ${room.scores.contestant} vs ${room.scores.chaser}`;
+      if (room.question) {
+        document.getElementById('question').style.display = 'block';
+        document.getElementById('question').innerHTML = `<h2>Otázka</h2><p>${room.question.text}</p>`;
+        renderAnswerInputs(room.question);
+      } else {
+        document.getElementById('question').style.display = 'none';
+        document.getElementById('answer').style.display = 'none';
+        locked = false;
+      }
+      if (room.answers.includes('chaser')) {
+        locked = true;
+        document.getElementById('answer').innerHTML = '<p>Odpověď odeslána, čekáme...</p>';
+      }
+    });
+
+    ioClient.on('questionResult', (result) => {
+      console.log('Výsledek', result);
+    });
+
+    function renderAnswerInputs(q) {
+      const wrap = document.getElementById('answerInputs');
+      wrap.innerHTML = '';
+      locked = false;
+      document.getElementById('answer').style.display = 'block';
+      if (q.options && Array.isArray(q.options)) {
+        q.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = `${String.fromCharCode(65+idx)}: ${opt}`;
+          btn.onclick = () => submitAnswer(idx);
+          wrap.appendChild(btn);
+        });
+        document.getElementById('btnSend').style.display = 'none';
+      } else {
+        const input = document.createElement('input');
+        input.required = true;
+        input.placeholder = 'Vaše odpověď';
+        input.id = 'openAnswer';
+        wrap.appendChild(input);
+        document.getElementById('btnSend').style.display = 'inline-block';
+      }
+    }
+
+    function submitAnswer(answer) {
+      if (locked) return;
+      ioClient.emit('submitAnswer', { roomCode, role: 'chaser', answer });
+      locked = true;
+    }
+
+    document.getElementById('answerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = document.getElementById('openAnswer').value.trim();
+      if (!val) return;
+      submitAnswer(val);
+    });
+  </script>
+</body>
+</html>
