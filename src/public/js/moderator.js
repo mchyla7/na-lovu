@@ -4,6 +4,7 @@ const uploadForm = document.getElementById('upload-form');
 const fileInput = document.getElementById('file-input');
 const statusMessage = document.getElementById('status-message');
 const startGameBtn = document.getElementById('start-game');
+const nextQuestionBtn = document.getElementById('next-question');
 
 socket.emit('join-as', 'moderator');
 
@@ -46,6 +47,14 @@ startGameBtn.addEventListener('click', () => {
     socket.emit('start-game');
     statusMessage.textContent = 'Hra byla spuštěna!';
     statusMessage.style.color = 'blue';
+    startGameBtn.disabled = true;
+    nextQuestionBtn.disabled = false;
+});
+
+nextQuestionBtn.addEventListener('click', () => {
+    socket.emit('next-question');
+    statusMessage.textContent = 'Další otázka...';
+    statusMessage.style.color = 'blue';
 });
 
 socket.on('questions-loaded', (data) => {
@@ -55,13 +64,16 @@ socket.on('questions-loaded', (data) => {
 });
 
 socket.on('new-question', (data) => {
-    statusMessage.textContent = `Otázka ${data.questionIndex + 1}/${data.totalQuestions}`;
+    statusMessage.textContent = `Otázka ${data.questionIndex + 1}/${data.totalQuestions}: ${data.question}`;
+    nextQuestionBtn.disabled = false;
 });
 
 socket.on('time-up', () => {
-    statusMessage.textContent = 'Čas vypršel! Klikněte pro další otázku.';
+    statusMessage.textContent = 'Čas vypršel! Klikněte "Další otázka".';
 });
 
 socket.on('game-over', (data) => {
     statusMessage.textContent = `Hra skončila! Lovec: ${data.hunterScore}, Soutěžící: ${data.contestantScore}. Vyhrál: ${data.winner === 'hunter' ? 'Lovec' : 'Soutěžící'}`;
+    nextQuestionBtn.disabled = true;
+    startGameBtn.disabled = false;
 });
