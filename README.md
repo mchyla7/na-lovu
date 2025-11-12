@@ -57,6 +57,8 @@ na-lovu
 
 ## Instalace
 
+### Standardní instalace
+
 1. Naklonujte repozitář:
    ```bash
    git clone <url-repozitare>
@@ -68,12 +70,43 @@ na-lovu
    npm install
    ```
 
-3. Spusťte server:
+3. Sestavte aplikaci:
+   ```bash
+   npm run build
+   ```
+
+4. Spusťte server:
    ```bash
    npm start
    ```
 
+5. Otevřete prohlížeč a přejděte na `http://localhost:3000`
+
+### Instalace pomocí Dockeru
+
+1. Naklonujte repozitář:
+   ```bash
+   git clone <url-repozitare>
+   cd na-lovu
+   ```
+
+2. Sestavte aplikaci lokálně:
+   ```bash
+   npm install
+   npm run build
+   ```
+
+3. Sestavte a spusťte pomocí Docker Compose:
+   ```bash
+   docker compose up -d
+   ```
+
 4. Otevřete prohlížeč a přejděte na `http://localhost:3000`
+
+5. Pro zastavení aplikace:
+   ```bash
+   docker compose down
+   ```
 
 ## Použití
 
